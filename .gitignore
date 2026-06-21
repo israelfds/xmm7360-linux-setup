@@ -1,0 +1,12 @@
+# build artifacts
+/build/
+*.deb
+
+# python
+__pycache__/
+*.pyc
+
+# editor / OS
+*.swp
+*~
+.DS_Store

@@ -1,0 +1,26 @@
+#!/bin/bash
+# Recuperação do modem 4G: reset PCI completo + reconexão.
+# Use se o modem travar (status 0xbadc0ded). Detecta o PCI automaticamente.
+set -e
+find_pci() {
+  for d in /sys/bus/pci/devices/*; do
+    [ "$(cat "$d/vendor" 2>/dev/null)" = "0x8086" ] && \
+    [ "$(cat "$d/device" 2>/dev/null)" = "0x7360" ] && { basename "$d"; return 0; }
+  done
+  return 1
+}
+echo "Resetando o modem XMM7360 (precisa de sudo)..."
+sudo modprobe -r xmm7360 2>/dev/null || true
+sleep 1
+PCI=$(find_pci || true)
+if [ -n "$PCI" ]; then
+  echo "  PCI detectado: $PCI"
+  echo 1 | sudo tee "/sys/bus/pci/devices/$PCI/reset" >/dev/null 2>&1 || true
+else
+  echo "  (dispositivo PCI 8086:7360 não encontrado; seguindo mesmo assim)"
+fi
+sleep 3
+sudo modprobe xmm7360
+sleep 2
+sudo systemctl restart xmm7360-lte
+echo "Pronto. Rode: lte-status"

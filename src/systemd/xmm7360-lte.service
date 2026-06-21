@@ -1,0 +1,18 @@
+[Unit]
+Description=XMM7360 LTE bring-up (4G interno)
+Wants=network.target
+After=network.target
+StartLimitIntervalSec=600
+StartLimitBurst=3
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=180
+ExecStartPre=/bin/sh -c '/sbin/modprobe xmm7360; for i in $(seq 1 60); do [ -e /dev/xmm0/rpc ] && /sbin/ip link show wwan0 >/dev/null 2>&1 && exit 0; sleep 1; done; exit 1'
+ExecStart=/usr/local/sbin/xmm7360-up.sh
+Restart=on-failure
+RestartSec=45
+
+[Install]
+WantedBy=multi-user.target

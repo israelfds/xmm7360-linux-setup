@@ -1,0 +1,3 @@
+# Modem XMM7360 e gerenciado pelo driver xmm7360-pci; ModemManager deve ignorar
+SUBSYSTEM=="tty", KERNEL=="ttyXMM*", ENV{ID_MM_DEVICE_IGNORE}="1"
+SUBSYSTEM=="net", KERNEL=="wwan0", ENV{ID_MM_DEVICE_IGNORE}="1"

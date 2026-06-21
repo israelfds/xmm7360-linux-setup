@@ -1,0 +1,33 @@
+#!/bin/bash
+# Mostra o estado do 4G (modem Intel XMM7360 / Fibocom L850-GL)
+IFACE=wwan0
+echo "==== 4G / XMM7360 ===="
+echo "Serviço     : $(systemctl is-active xmm7360-lte.service 2>/dev/null)"
+ipv6=$(ip -6 addr show "$IFACE" scope global 2>/dev/null | grep -oE "2[0-9a-f:]+/64" | head -1)
+echo "IPv6 $IFACE : ${ipv6:-(sem IP)}"
+
+# Conectividade REAL do modem, sem depender de DNS (ping IPv6 literal)
+printf "Modem (rede): "
+if ping -6 -c1 -W4 -I "$IFACE" 2606:4700:4700::1111 >/dev/null 2>&1; then
+  echo "✅ ONLINE (pacotes saem pela operadora)"
+else
+  echo "❌ offline"
+fi
+
+# DNS (resolução de nomes) funcionando?
+printf "DNS (nomes) : "
+if getent hosts one.one.one.one >/dev/null 2>&1; then
+  echo "✅ ok"
+else
+  echo "❌ falha (sem resolver nomes - provável WiFi off e $IFACE sem DNS)"
+fi
+
+# Navegação real por nome, forçando IPv6 pela interface do modem
+printf "Internet 4G : "
+if curl -6 -s --interface "$IFACE" --max-time 8 -o /dev/null https://ifconfig.me 2>/dev/null; then
+  echo "✅ CONECTADO"
+else
+  echo "❌ sem navegação por nome"
+fi
+echo "============================"
+echo "Reconectar: sudo systemctl restart xmm7360-lte"

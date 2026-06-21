@@ -1,0 +1,18 @@
+[Unit]
+Description=464XLAT CLAT daemon (NAT64) para o 4G XMM7360
+After=xmm7360-lte.service
+Requires=xmm7360-lte.service
+PartOf=xmm7360-lte.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStartPre=/usr/local/sbin/clatd-pre.sh
+ExecStart=/usr/local/sbin/clatd
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target

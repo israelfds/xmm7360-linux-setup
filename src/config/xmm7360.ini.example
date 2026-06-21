@@ -1,0 +1,31 @@
+# =====================================================================
+#  Configuração do modem Intel XMM7360 / Fibocom L850-GL
+# =====================================================================
+#  Edite a APN abaixo para a da SUA operadora e salve como
+#  /etc/xmm7360.ini  (o pacote .deb já instala este arquivo lá).
+# ---------------------------------------------------------------------
+#  APNs comuns no Brasil (descomente a sua, comente as outras):
+#    Vivo  -> apn=zap.vivo.com.br
+#    Claro -> apn=claro.com.br
+#    TIM   -> apn=timbrasil.br
+#    Oi    -> apn=gprsoi.br
+#  Em outros países, use a APN informada pela sua operadora.
+#  Se não souber, "internet" funciona em muitas redes.
+# =====================================================================
+
+apn=internet
+
+# --- Não mexa daqui pra baixo, a menos que saiba o que faz ---
+
+# A operadora entrega IPv6 nativo; a rota IPv4 que o driver tentaria
+# adicionar é inválida. nodefaultroute evita uma rota IPv4 fantasma.
+nodefaultroute=True
+
+# Diretório dos binários do setup
+BIN_DIR=/usr/local/bin
+
+# Opções extras do driver (normalmente não são necessárias):
+#ip-fetch-timeout=1
+#metric=1000
+#noresolv=True      # não escrever DNS em /etc/resolv.conf
+#dbus=True          # integração com NetworkManager
