@@ -54,6 +54,14 @@ class Applet:
         mi_rec.connect('activate', self.reconectar)
         m.append(mi_rec)
 
+        mi_reset = Gtk.MenuItem(label='Resetar modem (pede senha)')
+        mi_reset.connect('activate', self.resetar)
+        m.append(mi_reset)
+
+        mi_logs = Gtk.MenuItem(label='Ver logs')
+        mi_logs.connect('activate', self.ver_logs)
+        m.append(mi_logs)
+
         m.append(Gtk.SeparatorMenuItem())
         mi_quit = Gtk.MenuItem(label='Sair')
         mi_quit.connect('activate', lambda _: Gtk.main_quit())
@@ -91,6 +99,43 @@ class Applet:
     def reconectar(self, _):
         subprocess.Popen(['pkexec', 'systemctl', 'restart', 'xmm7360-lte'])
         GLib.timeout_add_seconds(8, lambda: (self.atualizar(), False)[1])
+
+    def resetar(self, _):
+        # Reset de hardware (rmmod -> PCI FLR -> modprobe -> reinicia servico).
+        # E o que realmente destrava o modem quando o firmware trava.
+        subprocess.Popen(['pkexec', '/usr/local/bin/lte-reset'])
+        GLib.timeout_add_seconds(15, lambda: (self.atualizar(), False)[1])
+
+    def ver_logs(self, _):
+        # Gera um .txt com status + logs do modem e do clatd e abre no editor.
+        threading.Thread(target=self._gerar_logs, daemon=True).start()
+
+    def _gerar_logs(self):
+        import datetime
+        caminho = '/tmp/4g-logs.txt'
+        try:
+            partes = []
+            partes.append('==== LOGS 4G / XMM7360 ====')
+            partes.append('Gerado em: %s\n' % datetime.datetime.now()
+                          .strftime('%d/%m/%Y %H:%M:%S'))
+            partes.append('---- lte-status ----')
+            partes.append(subprocess.run(
+                ['lte-status'], capture_output=True, text=True).stdout)
+            partes.append('\n---- journalctl xmm7360-lte (ultimas 300) ----')
+            partes.append(subprocess.run(
+                ['journalctl', '-u', 'xmm7360-lte', '-n', '300',
+                 '--no-pager'], capture_output=True, text=True).stdout)
+            partes.append('\n---- journalctl clatd (ultimas 200) ----')
+            partes.append(subprocess.run(
+                ['journalctl', '-u', 'clatd', '-n', '200',
+                 '--no-pager'], capture_output=True, text=True).stdout)
+            with open(caminho, 'w') as f:
+                f.write('\n'.join(partes))
+            subprocess.Popen(['xdg-open', caminho])
+        except Exception as e:
+            with open(caminho, 'w') as f:
+                f.write('Erro ao gerar logs: %s\n' % e)
+            subprocess.Popen(['xdg-open', caminho])
 
 
 if __name__ == '__main__':

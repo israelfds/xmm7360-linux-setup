@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1
+- Applet de bandeja: novo item **"Resetar modem"** (executa `lte-reset`: rmmod → reset PCI FLR → modprobe → reinicia serviço; destrava o firmware quando reconectar não resolve).
+- Applet de bandeja: novo item **"Ver logs"** (gera `/tmp/4g-logs.txt` com `lte-status` + journal do `xmm7360-lte` e `clatd` e abre no editor padrão).
+
 ## v1.0
 - Driver `xmm7360-pci` corrigido para kernels 6.x (6.6+ e 6.16+) e instalado via DKMS.
 - Serviço systemd `xmm7360-lte` para conexão automática no boot (idempotente).

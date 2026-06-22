@@ -4,7 +4,7 @@
 set -e
 
 PKG=xmm7360-linux
-VER=1.0
+VER=1.1
 HERE=$(cd "$(dirname "$0")" && pwd)
 SRC="$HERE/src"
 B="$HERE/build/${PKG}-${VER}"          # árvore de build do pacote
