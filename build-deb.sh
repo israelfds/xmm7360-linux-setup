@@ -4,7 +4,7 @@
 set -e
 
 PKG=xmm7360-linux
-VER=1.1
+VER=1.2
 HERE=$(cd "$(dirname "$0")" && pwd)
 SRC="$HERE/src"
 B="$HERE/build/${PKG}-${VER}"          # árvore de build do pacote
@@ -17,6 +17,7 @@ mkdir -p "$B/usr/lib/${PKG}/rpc"
 mkdir -p "$B/usr/local/sbin" "$B/usr/local/bin"
 mkdir -p "$B/etc/modprobe.d" "$B/etc/modules-load.d" "$B/etc/udev/rules.d"
 mkdir -p "$B/etc/systemd/system" "$B/etc/xdg/autostart"
+mkdir -p "$B/usr/lib/systemd/system-sleep"
 mkdir -p "$B/usr/share/doc/${PKG}"
 
 # ---------- 1) DRIVER (fonte p/ DKMS) ----------
@@ -53,6 +54,10 @@ cp "$SRC/config/xmm7360.conf"                   "$B/etc/modules-load.d/"
 cp "$SRC/config/77-xmm7360-mm-ignore.rules"     "$B/etc/udev/rules.d/"
 cp "$SRC/systemd/xmm7360-lte.service"           "$B/etc/systemd/system/"
 cp "$SRC/systemd/clatd.service"                 "$B/etc/systemd/system/"
+
+# hook de suspend/resume (reseta o modem ao voltar do suspend)
+cp "$SRC/sleep/xmm7360-resume"                  "$B/usr/lib/systemd/system-sleep/"
+chmod 755 "$B/usr/lib/systemd/system-sleep/xmm7360-resume"
 
 # autostart do applet
 cat > "$B/etc/xdg/autostart/lte-applet.desktop" <<'EOF'

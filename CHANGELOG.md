@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.2
+- Hook de suspend/resume (`/usr/lib/systemd/system-sleep/xmm7360-resume`): ao voltar do suspend o modem é resetado automaticamente (reset PCI FLR → recarrega driver → reconecta). Corrige o caso em que, depois de suspender, o firmware trava (`0xbadc0ded`) e o DNS do `wwan0` (domínio de roteamento `~.`) fica apontando para servidores inacessíveis — derrubando a navegação inclusive no WiFi até resetar o modem na mão.
+
 ## v1.1
 - Applet de bandeja: novo item **"Resetar modem"** (executa `lte-reset`: rmmod → reset PCI FLR → modprobe → reinicia serviço; destrava o firmware quando reconectar não resolve).
 - Applet de bandeja: novo item **"Ver logs"** (gera `/tmp/4g-logs.txt` com `lte-status` + journal do `xmm7360-lte` e `clatd` e abre no editor padrão).
