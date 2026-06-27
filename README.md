@@ -83,6 +83,16 @@ lte-reset                           # recuperação total (reset PCI) se travar
 - O 4G **não** aparece no menu de rede nativo (não passa pelo NetworkManager);
   use o **applet** de bandeja ou o `lte-status`.
 
+### Suspend / resume
+
+O firmware do XMM7360 **trava ao voltar do suspend** (`0xbadc0ded`). Como o
+`wwan0` é o resolvedor DNS padrão (`domain ~.`), isso derruba **todo** o DNS e
+parece até que o WiFi caiu. O hook `/usr/lib/systemd/system-sleep/xmm7360-resume`
+resolve sozinho no resume: reset PCI → recarrega driver → reconecta (refaz o DNS)
+→ reinicia o `clatd`. Sem reiniciar o `clatd`, os sites **só-IPv4 (ex.: GitHub)**
+ficariam fora do ar mesmo com o IPv6 já funcionando, pois é o NAT64 que os atende.
+Log do último resume em `/var/log/xmm7360-resume.log`.
+
 ## Estrutura do repositório
 
 ```
@@ -92,6 +102,7 @@ src/scripts/     bring-up, reset, clatd e clatd-pre (limpeza)
 src/bin/         lte-status, lte-reset, applet de bandeja
 src/config/      APN, clatd.conf, blacklist iosm, udev, modules-load
 src/systemd/     xmm7360-lte.service, clatd.service
+src/sleep/       hook de suspend/resume (reseta o modem ao voltar do suspend)
 build-deb.sh     monta o pacote .deb a partir de src/
 PATCHES.md       o que foi corrigido no driver p/ kernels 6.x
 NOTICE.md        créditos/atribuições dos componentes de terceiros
