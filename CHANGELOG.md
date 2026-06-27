@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.3
+- Hook de suspend/resume agora também **reinicia o `clatd`** (NAT64) após o reset do modem. Sem isso, depois de voltar do suspend o clatd ficava parado e os sites **só-IPv4 (ex.: GitHub)** não abriam, mesmo com o IPv6 já funcionando.
+
 ## v1.2
 - Hook de suspend/resume (`/usr/lib/systemd/system-sleep/xmm7360-resume`): ao voltar do suspend o modem é resetado automaticamente (reset PCI FLR → recarrega driver → reconecta). Corrige o caso em que, depois de suspender, o firmware trava (`0xbadc0ded`) e o DNS do `wwan0` (domínio de roteamento `~.`) fica apontando para servidores inacessíveis — derrubando a navegação inclusive no WiFi até resetar o modem na mão.
 

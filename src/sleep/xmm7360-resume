@@ -3,7 +3,8 @@
 # O firmware do modem 4G XMM7360 trava ao voltar do suspend (0xbadc0ded), o que
 # derruba o DNS (o wwan0 tem dominio de roteamento "~." no systemd-resolved) e
 # faz parecer que ate o WiFi caiu. Aqui resetamos o modem automaticamente no
-# resume: reset PCI (FLR) -> recarrega driver -> reconecta (que reconfigura DNS).
+# resume: reset PCI (FLR) -> recarrega driver -> reconecta (que reconfigura DNS)
+# -> reinicia o clatd (NAT64, sem ele os sites so-IPv4 como o GitHub nao abrem).
 # Roda em segundo plano pra nao atrasar a volta do suspend; log em /var/log.
 
 [ "$1" = "post" ] || exit 0
@@ -12,6 +13,10 @@
   echo "==== resume $(date '+%F %T') ===="
   /usr/local/sbin/xmm7360-reset.sh
   systemctl restart xmm7360-lte.service
+  # O clatd (PartOf do xmm7360-lte) nem sempre volta sozinho apos o reset, e
+  # pode estar travado no rate-limit; limpa e sobe de novo com a conexao pronta.
+  systemctl reset-failed clatd.service 2>/dev/null || true
+  systemctl restart clatd.service
   echo "xmm7360-resume: concluido"
 ) >>/var/log/xmm7360-resume.log 2>&1 &
 
